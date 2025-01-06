@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
         "bishop", 
         "lead_pastor", 
         "administrator", 
-        "director", 
+        "zone_manager", 
         "center_manager", 
         "bacenta_leader"
       ],
@@ -32,6 +32,11 @@ const userSchema = new mongoose.Schema(
     centerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Center',  // Reference to the 'Center' model (assuming you have a 'Center' model)
+      default: null,
+    },
+    zoneId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Zone',  // Reference to the 'Center' model (assuming you have a 'Zone' model)
       default: null,
     },
     bacentaId: {

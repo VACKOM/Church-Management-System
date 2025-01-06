@@ -3,12 +3,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/userModel');
 const Center = require('../../models/centerModel'); // Assuming you have a Center model
+const Zone = require("../../models/zoneModel");
 const Bacenta = require('../../models/bacentaModel'); // Assuming you have a Bacenta model 
 const rolePermissions = require('../../config/rolePermissions');
 
 
 const register = async (req, res) => {
-  const { username, password, role, centerId, bacentaId } = req.body;
+  const { username, password, role, centerId, zoneId, bacentaId } = req.body;
   const permissions = rolePermissions[role];
   
   // Validate input
@@ -33,6 +34,16 @@ const register = async (req, res) => {
       centerObjectId = center._id; // Use the ObjectId of the Center
     }
 
+     // Validate and convert zoneId and bacentaId to ObjectId if necessary
+     let zoneObjectId = null;
+     if (zoneId) {
+       const zone = await Zone.findOne({ name: zoneId });
+       if (!zone) {
+         return res.status(400).json({ message: `Zone with name "${zoneId}" not found` });
+       }
+       zoneObjectId = zone._id; // Use the ObjectId of the Zone
+     }
+
     let bacentaObjectId = null;
     if (bacentaId) {
       const bacenta = await Bacenta.findOne({ name: bacentaId });
@@ -49,6 +60,7 @@ const register = async (req, res) => {
       role,
       permissions: permissions,
       centerId: centerObjectId,  // Save ObjectId for centerId
+      zoneId: zoneObjectId,  // Save ObjectId for zoneId
       bacentaId: bacentaObjectId,  // Save ObjectId for bacentaId
     });
     await user.save();
@@ -88,6 +100,7 @@ const login = async (req, res) => {
         role: user.role, 
         permissions: user.permissions, 
         centerId: user.centerId, 
+        zoneId: user.zoneId, 
         bacentaId: user.bacentaId 
       }, 
       process.env.JWT_SECRET, 

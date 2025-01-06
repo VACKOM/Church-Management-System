@@ -13,18 +13,18 @@ router.get("/pastor", authenticate, authorize(['bishop', 'lead_pastor']), (req, 
     res.json({ message: "Welcome to Lead Pastor's Dashboard" });
 });
 
-// Only Bishop, Lead_Pastor, and Directors can access this route
-router.get("/director", authenticate, authorize(['bishop', 'lead_pastor', 'director']), (req, res) => {
-    res.json({ message: "Welcome to Director's Dashboard" });
-});
 
 // Only Bishop, Lead_Pastor, Directors, and Center_Managers can access this route
-router.get("/center", authenticate, authorize(['bishop', 'lead_pastor', 'director', 'center_manager']), (req, res) => {
+router.get("/center", authenticate, authorize(['bishop', 'lead_pastor', 'center_manager']), (req, res) => {
     res.json({ message: "Welcome to Center Manager's Dashboard" });
 });
 
-// Only Bishop, Lead_Pastor, Directors, Center_Managers, and Bacenta_Leaders can access this route
-router.get("/bacenta", authenticate, authorize(['bishop', 'lead_pastor', 'director', 'center_manager', 'bacenta_leader']), (req, res) => {
+// Only Bishop, Lead_Pastor, and Zone_Manager can access this route
+router.get("/zone", authenticate, authorize(['bishop', 'lead_pastor',  'center_manager','zone_manager']), (req, res) => {
+    res.json({ message: "Welcome to Zone's Dashboard" });
+});
+// Only Bishop, Lead_Pastor, Directors, Center_Managers, Zone_Manager and Bacenta_Leaders can access this route
+router.get("/bacenta", authenticate, authorize(['bishop', 'lead_pastor', 'center_manager', 'bacenta_leader','zone_manager']), (req, res) => {
     res.json({ message: "Welcome to Bacenta Leader's Dashboard" });
 });
 
