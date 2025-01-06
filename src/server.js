@@ -7,6 +7,7 @@ const adminRoutes = require("./routes/api/administrators");
 const bacentaRoutes = require("./routes/api/bacentaRoutes");
 const centerRoutes = require("./routes/api/centersRoutes");
 const directorRoutes = require("./routes/api/directors");
+const zoneRoutes = require("./routes/api/zonesRoutes");
 const dbConnect = require("./config/connect");
 const authRoutes = require("./routes/users/authRouters");
 const userRoutes = require("./routes/users/userRouters");
@@ -23,6 +24,7 @@ app.use('/api/admins', adminRoutes); // Set up admin routes
 app.use('/api/bacentas', bacentaRoutes); // Set up bacenta routes
 app.use('/api/centers', centerRoutes); // Set up center routes
 app.use('/api/director', directorRoutes); // Set up director routes
+app.use('/api/zones', zoneRoutes); // Set up director routes
 app.use('/api/users', userRoutes);
 
 //Connect to the database and then start the server
