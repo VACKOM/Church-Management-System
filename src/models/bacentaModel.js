@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bacentaSchema = new mongoose.Schema({
   name: { type: String, required: true },
   leader: { type: String, required: true },
-  center: { type: String, required: true },
+  zone: { type: String, required: true },
   code: { type: String, required: true },
   location: { type: String, required: true },
   contact: { type: String, required: true },

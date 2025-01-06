@@ -5,7 +5,8 @@ const zoneSchema = new mongoose.Schema({
   zoneName: { type: String, required: true },
   zoneLeader: { type: String },
   zoneContact: { type: String },
-  zoneEmail: { type: String }
+  zoneEmail: { type: String },
+  center: {type:String}
 },
 {
     timestamps: true,
