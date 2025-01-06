@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const centerSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  location: { type: String },
-  code: { type: String },
-  leader: { type: String },
-  contact: { type: String } 
+  centerID: { type: String },
+  centerName: { type: String, required: true },
+  centerLeader: { type: String },
+  centerContact: { type: String },
+  centerEmail: { type: String }
 },
 {
     timestamps: true,

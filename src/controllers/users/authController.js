@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/userModel');
 const Center = require('../../models/centerModel'); // Assuming you have a Center model
-const Bacenta = require('../../models/bacentaModel'); // Assuming you have a Bacenta model
+const Bacenta = require('../../models/bacentaModel'); // Assuming you have a Bacenta model 
 const rolePermissions = require('../../config/rolePermissions');
 
 
