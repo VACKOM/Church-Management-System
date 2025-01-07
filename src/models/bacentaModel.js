@@ -8,7 +8,7 @@ const bacentaSchema = new mongoose.Schema({
   bacentaLocation: { type: String, required: true },
   bacentaContact: { type: String, required: true },
   bacentaDateStarted: { type: Date, required: true },
-  bacentaEmail: { type: Date, required: true }
+  bacentaEmail: { type: String, required: true }
 },
 {
     timestamps: true,
