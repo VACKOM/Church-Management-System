@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
 
 const bacentaSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  leader: { type: String, required: true },
+  bacenatName: { type: String, required: true },
+  bacentaLeader: { type: String, required: true },
   zone: { type: String, required: true },
-  code: { type: String, required: true },
-  location: { type: String, required: true },
-  contact: { type: String, required: true },
+  bacentaID: { type: String, required: true },
+  bacentaLocation: { type: String, required: true },
+  bacentaContact: { type: String, required: true },
   started: { type: Date, required: true },
+  bacentaEmail: { type: Date, required: true }
 },
 {
     timestamps: true,
