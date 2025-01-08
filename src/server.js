@@ -9,6 +9,7 @@ const centerRoutes = require("./routes/api/centersRoutes");
 const directorRoutes = require("./routes/api/directors");
 const targetRoutes = require("./routes/api/targetRoutes");
 const zoneRoutes = require("./routes/api/zonesRoutes");
+const attendanceRoutes = require("./routes/api/attendanceRoutes");
 const dbConnect = require("./config/connect");
 const authRoutes = require("./routes/users/authRouters");
 const userRoutes = require("./routes/users/userRouters");
@@ -27,6 +28,7 @@ app.use('/api/centers', centerRoutes); // Set up center routes
 app.use('/api/director', directorRoutes); // Set up director routes
 app.use('/api/zones', zoneRoutes); // Set up director routes
 app.use('/api/targets', targetRoutes); // Set up director routes
+app.use('/api/attendances', attendanceRoutes); // Set up director routes
 app.use('/api/users', userRoutes);
 
 //Connect to the database and then start the server

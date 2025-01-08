@@ -35,7 +35,7 @@ exports.getBacentaById = async (req, res) => {
     }
 };
 
-// Create Bacenta
+// Create Bacenta 
 exports.createBacenta = async (req, res) => {
     try {
         const bacenta = new Bacenta(req.body);

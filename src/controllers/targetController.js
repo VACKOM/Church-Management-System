@@ -11,6 +11,14 @@ exports.createTarget = async (req, res) => {
       return res.status(400).json({ message: 'Invalid performance data. Must include data for all 12 months.' });
     }
 
+    // Add validation for numeric values in performanceData
+    if (!performanceData.every(item => 
+      typeof item.targetMembers === 'number' && item.targetMembers >= 0 &&
+      typeof item.targetBacentas === 'number' && item.targetBacentas >= 0 &&
+      typeof item.targetChurchAttendance === 'number' && item.targetChurchAttendance >= 0)) {
+        return res.status(400).json({ message: 'Performance data contains invalid values.' });
+    }
+
     // Create a new target document
     const newTarget = new Target({
       targetName,
@@ -43,6 +51,12 @@ exports.getAllTargets = async (req, res) => {
 exports.getTargetById = async (req, res) => {
   try {
     const targetId = req.params.id;
+
+    // Check if the targetId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(targetId)) {
+      return res.status(400).json({ message: 'Invalid target ID format.' });
+    }
+
     const target = await Target.findById(targetId);
 
     if (!target) {
@@ -62,6 +76,17 @@ exports.updateMonthlyPerformance = async (req, res) => {
     const targetId = req.params.id;
     const { month, targetMembers, targetBacentas, targetChurchAttendance } = req.body;
 
+    const validMonths = [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 
+      'September', 'October', 'November', 'December'
+    ];
+    
+    // Validate month
+    if (!validMonths.includes(month)) {
+      return res.status(400).json({ message: 'Invalid month name.' });
+    }
+
+    // Validate the presence of required performance data
     if (!month || !targetMembers || !targetBacentas || !targetChurchAttendance) {
       return res.status(400).json({ message: 'Missing required data for monthly performance' });
     }
@@ -104,6 +129,10 @@ exports.updateYearlySummary = async (req, res) => {
       return res.status(404).json({ message: 'Target not found' });
     }
 
+    if (!target.performanceData.length) {
+      return res.status(400).json({ message: 'No performance data available to calculate the yearly summary.' });
+    }
+
     // Calculate yearly summary based on performance data
     const yearlySummary = target.performanceData.reduce((summary, monthData) => {
       summary.totalMembers += monthData.targetMembers || 0;
@@ -129,6 +158,12 @@ exports.updateYearlySummary = async (req, res) => {
 exports.deleteTarget = async (req, res) => {
   try {
     const targetId = req.params.id;
+
+    // Check if the targetId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(targetId)) {
+      return res.status(400).json({ message: 'Invalid target ID format.' });
+    }
+
     const target = await Target.findById(targetId);
 
     if (!target) {
@@ -136,7 +171,7 @@ exports.deleteTarget = async (req, res) => {
     }
 
     // Delete the target
-    await target.remove();
+    await Target.findByIdAndDelete(targetId);
 
     return res.status(200).json({ message: 'Target deleted successfully' });
   } catch (error) {
