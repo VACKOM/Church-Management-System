@@ -11,6 +11,7 @@ const attendanceSchema = new mongoose.Schema({
   centerName: { type: String, required: true },
   bacentaName: { type: String, required: true },
   laySchoolAttendance: { type: Number, required: true },
+  noBacentaMeeting: {type: Number, required: true},
   dateAttendance: {type: Date, required: true}
 },
 {
