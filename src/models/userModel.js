@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 8, // Ensure passwords are at least 8 characters long for better security
     },
+    email: {
+      type: String,
+      required: true,
+      //unique: true,
+    },
     role: {
       type: String,
       required: true,
@@ -20,9 +25,9 @@ const userSchema = new mongoose.Schema(
         "bishop", 
         "lead_pastor", 
         "administrator", 
-        "zone_manager", 
-        "center_manager", 
-        "bacenta_leader"
+        "zone", 
+        "center", 
+        "bacenta"
       ],
     },
     permissions: {
@@ -44,6 +49,10 @@ const userSchema = new mongoose.Schema(
       ref: 'Bacenta', // Reference to the 'Bacenta' model (assuming you have a 'Bacenta' model)
       default: null,
     },
+    profileImagePath: {
+      type: String,  // Save the image file path as a string
+      default: null, // If no image is uploaded, set the default to null
+    }
   },
   {
     timestamps: true,
@@ -73,3 +82,4 @@ userSchema.methods.comparePassword = async function(password) {
 };
 
 module.exports = mongoose.model('User', userSchema);
+

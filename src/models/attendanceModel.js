@@ -1,18 +1,10 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
-  bacentaMembership: { type: Number, required: true },
-  adultAttendance: { type: Number, required: true },
-  childrenAttendance: { type: Number, required: true },
-  soulsInChurch: { type: Number, required: true },
-  bacentaMeetingAttendance: { type: Number, required: true },
-  newBelieversSchoolAttendance: { type: Number, required: true },
-  membersAbsent: { type: Number, required: true },
-  centerName: { type: String, required: true },
-  bacentaName: { type: String, required: true },
-  laySchoolAttendance: { type: Number, required: true },
-  noBacentaMeeting: {type: Number, required: true},
-  dateAttendance: {type: Date, required: true}
+  member_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
+  date:{type:Date, required:true},
+  service: { type: Number, required: true },
+  status: { type: Number, required: true }
 },
 {
     timestamps: true,

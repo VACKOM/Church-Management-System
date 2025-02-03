@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Attendance = require("../models/attendanceModel");
 
+
 //# 1. Retrieve All Attendances
 exports.getAllAttendances = async (req, res) => {
     try {

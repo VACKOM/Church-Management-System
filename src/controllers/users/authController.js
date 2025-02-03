@@ -4,9 +4,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/userModel');
 const Center = require('../../models/centerModel'); // Assuming you have a Center model
 const Zone = require("../../models/zoneModel");
-const Bacenta = require('../../models/bacentaModel'); // Assuming you have a Bacenta model 
+const Bacenta = require('../../models/bacentaModel'); // Assuming you have a Bacenta model
 const rolePermissions = require('../../config/rolePermissions');
-
 
 const register = async (req, res) => {
   const { username, password, role, centerId, zoneId, bacentaId } = req.body;
@@ -17,40 +16,50 @@ const register = async (req, res) => {
     return res.status(400).json({ message: 'Username, password, and role are required' });
   }
 
-  try {
-    // Check if user already exists..
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+  // Check if user already exists
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    return res.status(400).json({ message: 'User already exists' });
+  }
 
-    // Validate and convert centerId and bacentaId to ObjectId if necessary
+  try {
+    // Validate and check if centerId exists
     let centerObjectId = null;
     if (centerId) {
-      const center = await Center.findOne({ name: centerId });
-      if (!center) {
-        return res.status(400).json({ message: `Center with name "${centerId}" not found` });
+      if (!mongoose.Types.ObjectId.isValid(centerId)) {
+        return res.status(400).json({ message: 'Invalid centerId format' });
       }
-      centerObjectId = center._id; // Use the ObjectId of the Center
+      centerObjectId = centerId; // Use the provided ObjectId
+      const centerExists = await Center.findById(centerObjectId);
+      if (!centerExists) {
+        return res.status(400).json({ message: `Center with ID "${centerId}" does not exist` });
+      }
     }
 
-     // Validate and convert zoneId and bacentaId to ObjectId if necessary
-     let zoneObjectId = null;
-     if (zoneId) {
-       const zone = await Zone.findOne({ name: zoneId });
-       if (!zone) {
-         return res.status(400).json({ message: `Zone with name "${zoneId}" not found` });
-       }
-       zoneObjectId = zone._id; // Use the ObjectId of the Zone
-     }
+    // Validate and check if zoneId exists
+    let zoneObjectId = null;
+    if (zoneId) {
+      if (!mongoose.Types.ObjectId.isValid(zoneId)) {
+        return res.status(400).json({ message: 'Invalid zoneId format' });
+      }
+      zoneObjectId = zoneId; // Use the provided ObjectId
+      const zoneExists = await Zone.findById(zoneObjectId);
+      if (!zoneExists) {
+        return res.status(400).json({ message: `Zone with ID "${zoneId}" does not exist` });
+      }
+    }
 
+    // Validate and check if bacentaId exists
     let bacentaObjectId = null;
     if (bacentaId) {
-      const bacenta = await Bacenta.findOne({ name: bacentaId });
-      if (!bacenta) {
-        return res.status(400).json({ message: `Bacenta with name "${bacentaId}" not found` });
+      if (!mongoose.Types.ObjectId.isValid(bacentaId)) {
+        return res.status(400).json({ message: 'Invalid bacentaId format' });
       }
-      bacentaObjectId = bacenta._id; // Use the ObjectId of the Bacenta
+      bacentaObjectId = bacentaId; // Use the provided ObjectId
+      const bacentaExists = await Bacenta.findById(bacentaObjectId);
+      if (!bacentaExists) {
+        return res.status(400).json({ message: `Bacenta with ID "${bacentaId}" does not exist` });
+      }
     }
 
     // Create new user
@@ -59,12 +68,12 @@ const register = async (req, res) => {
       password,
       role,
       permissions: permissions,
-      centerId: centerObjectId,  // Save ObjectId for centerId
-      zoneId: zoneObjectId,  // Save ObjectId for zoneId
-      bacentaId: bacentaObjectId,  // Save ObjectId for bacentaId
+      centerId: centerObjectId,  // Store the ObjectId for centerId
+      zoneId: zoneObjectId,  // Store the ObjectId for zoneId
+      bacentaId: bacentaObjectId,  // Store the ObjectId for bacentaId
     });
+
     await user.save();
-    
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     console.error(error);  // Log the error for debugging purposes
@@ -81,19 +90,17 @@ const login = async (req, res) => {
   }
 
   try {
-    // Find user by username
     const user = await User.findOne({ username });
+   
     if (!user) {
       return res.status(400).json({ message: 'Username Invalid' });
     }
 
-    // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'password invalid' });
+      return res.status(400).json({ message: 'Password invalid' });
     }
 
-    // Create JWT token, including the user's role, permissions, centerId, and bacentaId
     const token = jwt.sign(
       { 
         id: user._id, 
@@ -101,12 +108,12 @@ const login = async (req, res) => {
         permissions: user.permissions, 
         centerId: user.centerId, 
         zoneId: user.zoneId, 
-        bacentaId: user.bacentaId 
+        bacentaId: user.bacentaId
       }, 
       process.env.JWT_SECRET, 
-      { expiresIn: '1h' } // Token expires in 1 hour
+      { expiresIn: '1h' }
     );
-    
+ 
     res.json({ token });
   } catch (error) {
     console.error(error);
@@ -114,5 +121,6 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
 
+
+module.exports = { register, login };

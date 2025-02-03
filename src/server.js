@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv").config();
+const path = require('path');
 const memberRoutes = require("./routes/api/membersRoutes");
 const adminRoutes = require("./routes/api/administrators");
 const bacentaRoutes = require("./routes/api/bacentaRoutes");
@@ -30,6 +31,9 @@ app.use('/api/zones', zoneRoutes); // Set up director routes
 app.use('/api/targets', targetRoutes); // Set up director routes
 app.use('/api/attendances', attendanceRoutes); // Set up director routes
 app.use('/api/users', userRoutes);
+// Serve static files from the 'uploads' directory
+// Serve static files from the 'uploads' directory in your backend
+app.use('/uploads', express.static(path.join(__dirname, 'utilities', 'uploads')));
 
 //Connect to the database and then start the server
 dbConnect();
