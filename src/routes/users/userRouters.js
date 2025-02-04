@@ -48,7 +48,7 @@ router.get("/bacenta", authenticate, authorize(['bishop', 'lead_pastor', 'center
 });
 
 // Route for creating a user, with file upload (e.g., profile image)
-router.post('/', upload.single('profileImage'), (req, res, next) => {
+router.post('/', upload.single('profileImage'), async (req, res, next) => {
     console.log('POST /api/users route triggered');
     next();  // Continue to the next middleware (which is the userController.createUser) 
   }, userController.createUser);

@@ -4,13 +4,13 @@ const fs = require('fs');
 
 // Absolute path for the uploads directory
 const uploadDir = path.join(__dirname, 'uploads');
+console.log(uploadDir)
+// Ensure the 'uploads' directory exists asynchronously
+fs.promises.mkdir(uploadDir, { recursive: true })
+  .then(() => console.log('Uploads directory created.'))
+  .catch((err) => console.error('Error creating uploads directory:', err));
 
-// Ensure the 'uploads' directory exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-  console.log('Uploads directory created.');
-}
-
+// Multer storage configuration
 const storage = multer.diskStorage({
   // Destination folder for uploaded files
   destination: (req, file, cb) => {
@@ -19,22 +19,13 @@ const storage = multer.diskStorage({
   // File naming function
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const originalFileName = file.originalname; // Store the original file name
-    const fileExtension = path.extname(file.originalname); // Get file extension
-
-    // Save the file with a unique name while retaining the extension
-    cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
-
-    // Optionally, store the original file name for later use
-    req.fileOriginalName = originalFileName; // You can use this value wherever needed (like in a database or response)
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    console.log("filename created")
   }
 });
 
-
 // Multer instance for handling file uploads
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, limits: { fileSize: 10 * 1024 * 1024 } });  // Limit file size to 10MB
 
 // Export the multer instance
 module.exports = upload;
-
-
