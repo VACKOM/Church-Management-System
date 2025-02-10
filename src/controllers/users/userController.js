@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
+const axios = require("axios");
 const mongoose = require("mongoose");
 const User = require("../../models/userModel");
+
 require('dotenv').config();
 
 //# 1. Retrieve All Users
@@ -73,7 +75,7 @@ exports.getUserById = async (req, res) => {
 exports.createUser = async (req, res) => {
     try {
       const profileImagePath = req.file
-        ? `http://localhost:8080/uploads/${req.file.filename}`
+        ? `https://church-management-system-39vg.onrender.com/uploads/${req.file.filename}`
         : null;
   
       // Create a new user with the data from the request body
@@ -89,9 +91,20 @@ exports.createUser = async (req, res) => {
         profileImagePath: profileImagePath,
         
       });
-  console.log(user);
+      const userPassword = req.body.password;
       // Save the user to the database
       const savedUser = await user.save();
+
+      const apiKey = process.env.MNOTIFY_API_KEY;
+      // console.log(otp);
+      const response = await axios.post('https://apps.mnotify.net/smsapi?', {
+        key: apiKey,
+        to: user.email,
+        msg: `Your username: ${user.username}\nYour temporal password: ${userPassword}\nClick the link to login:\nhttps://stateofthekeepersapp.netlify.app/`,
+
+        sender_id: 'KeepersApp' // Customize this sender name   
+      });
+      
   
       // Send the email after saving the user
      // sendWelcomeEmail(savedUser.username,savedUser.email, savedUser.password);

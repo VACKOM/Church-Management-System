@@ -68,7 +68,7 @@ const register = async (req, res) => {
       password,
       role,
       permissions: permissions,
-      centerId: centerObjectId,  // Store the ObjectId for centerId
+      centerId: centerObjectId,  // Store the ObjectId for centerId 
       zoneId: zoneObjectId,  // Store the ObjectId for zoneId
       bacentaId: bacentaObjectId,  // Store the ObjectId for bacentaId
     });
@@ -83,6 +83,9 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { username, password } = req.body;
+
+  console.log(username);
+  console.log(password);
 
   // Validate input
   if (!username || !password) {
