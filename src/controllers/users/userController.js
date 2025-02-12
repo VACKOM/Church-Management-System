@@ -80,6 +80,9 @@ exports.createUser = async (req, res) => {
   
       // Create a new user with the data from the request body
       const user = new User({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        userContact: req.body.userContact,
         email: req.body.email, // Assuming you have an email field in the form
         username: req.body.username,
         password: req.body.password,
@@ -91,15 +94,17 @@ exports.createUser = async (req, res) => {
         profileImagePath: profileImagePath,
         
       });
+
+      //console.log(user.userContact);
       const userPassword = req.body.password;
       // Save the user to the database
       const savedUser = await user.save();
 
       const apiKey = process.env.MNOTIFY_API_KEY;
-      // console.log(otp);
+    
       const response = await axios.post('https://apps.mnotify.net/smsapi?', {
         key: apiKey,
-        to: user.email,
+        to: user.userContact,
         msg: `Your username: ${user.username}\nYour temporal password: ${userPassword}\nClick the link to login:\nhttps://stateofthekeepersapp.netlify.app/`,
 
         sender_id: 'KeepersApp' // Customize this sender name   

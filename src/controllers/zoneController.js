@@ -20,8 +20,7 @@ exports.getAllZones = async (req, res) => {
 exports.getZoneById = async (req, res) => {
     try {
         const zoneId = req.params.id;
-       // console.log(zoneId);
-
+     
         if (!mongoose.Types.ObjectId.isValid(zoneId)) {
             return res.status(400).json({ message: "Invalid ObjectId format" });
         }
