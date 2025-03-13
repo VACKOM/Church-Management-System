@@ -11,6 +11,12 @@ router.get("/", userController.getAllUsers);
 // Retrieve One User
 router.get("/:id", userController.getUserById);
 
+// Assuming you have a userController that has a method called `getUserByContact`
+router.get("/picturepath/:contact", userController.getUserByContact);
+
+// Fetch all pictures
+router.get("/pictures/:all", userController.getUserPictures);
+
 // // Create User
 // router.post("/", userController.createUser);
 

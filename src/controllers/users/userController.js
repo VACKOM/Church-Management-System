@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const axios = require("axios");
 const mongoose = require("mongoose");
 const User = require("../../models/userModel");
+const Files = require("../../models/fileModel");
 
 require('dotenv').config();
 
@@ -39,6 +40,48 @@ exports.getUserById = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+// Example userController function to retrieve user by contact number
+exports.getUserByContact = async (req, res) => {
+    
+    try {
+      const { contact } = req.params; // Access the contact number passed in the route
+      const user = await Files.findOne({ originalName: contact }); // Assuming you're querying by contact number
+  
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      // Return the user data (including the file URL if that's part of the user model)
+      res.status(200).json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Error fetching user data" });
+    }
+  };
+
+
+  // Example userController function to retrieve user by contact number
+  exports.getUserPictures = async (req, res) => {
+  
+    try {
+      // Fetch all files from the database
+      const files = await Files.find(); // Assuming you are using 'File' model as per your schema
+  
+      if (files.length > 0) {
+        res.json(files); // Return all files found
+      } else {
+        res.status(404).json({ message: "No Records Found :(" });
+      }
+    } catch (error) {
+      console.error("Error fetching user pictures:", error);
+      res.status(500).json({ message: error.message });
+    }
+  };
+  
+
+  
+  
 
 // // Function to send email
 // const sendWelcomeEmail = (userEmail, username,password) => {
