@@ -1,8 +1,9 @@
-const mongoose = require("mongoose");
-const Center = require("../models/centerModel");
+
+import mongoose from "mongoose";
+import Center from "../models/centerModel.js";
 
 //# 1. Retrieve All Centers
-exports.getAllCenters = async (req, res) => {
+export const getAllCenters = async (req, res) => {
     try {
         
         const centers = await Center.find();
@@ -17,7 +18,7 @@ exports.getAllCenters = async (req, res) => {
 };
 
 // Retrieve One Center
-exports.getCenterById = async (req, res) => {
+export const getCenterById = async (req, res) => {
     try {
         const centerId = req.params.id;
 
@@ -37,7 +38,7 @@ exports.getCenterById = async (req, res) => {
 };
 
 // Create Center
-exports.createCenter = async (req, res) => {
+export const createCenter = async (req, res) => {
     try {
         const center = new Center(req.body);
         const savedCenter= await center.save();
@@ -48,7 +49,7 @@ exports.createCenter = async (req, res) => {
 };
 
 // Update Center
-exports.updateCenter = async (req, res) => {
+export const updateCenter = async (req, res) => {
     try {
         const centerId = req.params.id;
 
@@ -68,7 +69,7 @@ exports.updateCenter = async (req, res) => {
 };
 
 // Delete Center
-exports.deleteCenter = async (req, res) => {
+export const deleteCenter = async (req, res) => {
     try {
         const centerId = req.params.id;
 
@@ -86,3 +87,11 @@ exports.deleteCenter = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export default {
+    getAllCenters,
+    getCenterById,
+    createCenter,
+    updateCenter,
+    deleteCenter
+  };

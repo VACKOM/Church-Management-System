@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
-const Member = require("../models/memberModel");
+import mongoose from "mongoose";
+import Member from "../models/memberModel.js";
 
 //# 1. Retrieve All Members
-exports.getAllMembers = async (req, res) => {
+export const getAllMembers = async (req, res) => {
     try {
         
         const members = await Member.find();
@@ -17,7 +17,7 @@ exports.getAllMembers = async (req, res) => {
 };
 
 // Retrieve One Member
-exports.getMemberById = async (req, res) => {
+export const getMemberById = async (req, res) => {
     try {
         const memberId = req.params.id;
 
@@ -37,7 +37,7 @@ exports.getMemberById = async (req, res) => {
 };
 
 // Create Member
-exports.createMember = async (req, res) => {
+export const createMember = async (req, res) => {
     try {
         const member = new Member(req.body);
         const savedMember= await member.save();
@@ -48,7 +48,7 @@ exports.createMember = async (req, res) => {
 };
 
 // Update Member
-exports.updateMember = async (req, res) => {
+export const updateMember = async (req, res) => {
     try {
         const MemberId = req.params.id;
 
@@ -68,7 +68,7 @@ exports.updateMember = async (req, res) => {
 };
 
 // Delete Member
-exports.deleteMember = async (req, res) => {
+export const deleteMember = async (req, res) => {
     try {
         const memberId = req.params.id;
 
@@ -86,3 +86,11 @@ exports.deleteMember = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export default {
+    getAllMembers,
+    getMemberById,
+    createMember,
+    updateMember,
+    deleteMember
+  };

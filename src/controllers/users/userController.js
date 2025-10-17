@@ -1,13 +1,17 @@
-const nodemailer = require('nodemailer');
-const axios = require("axios");
-const mongoose = require("mongoose");
-const User = require("../../models/userModel");
-const Files = require("../../models/fileModel");
+import nodemailer from 'nodemailer';
+import axios from 'axios';
+import mongoose from 'mongoose';
+import User from '../../models/userModel.js'
+import Files from '../../models/fileModel.js'
+import Role from "../../models/roleModel.js"; // ✅ import Role model
+import dotenv from "dotenv";
+import Permission from "../../models/permission.js";
 
-require('dotenv').config();
+dotenv.config();
+
 
 //# 1. Retrieve All Users
-exports.getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
     try {
         
         const users = await User.find();
@@ -22,7 +26,7 @@ exports.getAllUsers = async (req, res) => {
 };
 
 // Retrieve One User    
-exports.getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
     try {
         const userId = req.params.id;
 
@@ -43,7 +47,7 @@ exports.getUserById = async (req, res) => {
 
 
 // Example userController function to retrieve user by contact number
-exports.getUserByContact = async (req, res) => {
+export const getUserByContact = async (req, res) => {
     
     try {
       const { contact } = req.params; // Access the contact number passed in the route
@@ -62,7 +66,7 @@ exports.getUserByContact = async (req, res) => {
 
 
   // Example userController function to retrieve user by contact number
-  exports.getUserPictures = async (req, res) => {
+  export const getUserPictures = async (req, res) => {
   
     try {
       // Fetch all files from the database
@@ -113,80 +117,180 @@ exports.getUserByContact = async (req, res) => {
 //   };
 
 
-// Create User
 
-exports.createUser = async (req, res) => {
-    try {
-      const profileImagePath = req.file
-        ? `https://church-management-system-39vg.onrender.com/uploads/${req.file.filename}`
-        : null;
-  
-      // Create a new user with the data from the request body
-      const user = new User({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        userContact: req.body.userContact,
-        email: req.body.email, // Assuming you have an email field in the form
-        username: req.body.username,
-        password: req.body.password,
-        role: req.body.role,
-        permissions: req.body.permissions,
-        centerId: req.body.centerId,
-        zoneId: req.body.zoneId,
-        bacentaId: req.body.bacentaId,
-        profileImagePath: profileImagePath,
-        
-      });
 
-      //console.log(user.userContact);
-      const userPassword = req.body.password;
-      // Save the user to the database
-      const savedUser = await user.save();
+//Create User
 
-      const apiKey = process.env.MNOTIFY_API_KEY;
-    
-      const response = await axios.post('https://apps.mnotify.net/smsapi?', {
-        key: apiKey,
-        to: user.userContact,
-        msg: `Your username: ${user.username}\nYour temporal password: ${userPassword}\nClick the link to login:\nhttps://stateofthekeepersapp.netlify.app/`,
+export const createUser = async (req, res) => {
+  try {
+    const profileImagePath = req.file
+      ? `https://church-management-system-39vg.onrender.com/uploads/${req.file.filename}`
+      : null;
 
-        sender_id: 'KeepersApp' // Customize this sender name   
-      });
-      
-  
-      // Send the email after saving the user
-     // sendWelcomeEmail(savedUser.username,savedUser.email, savedUser.password);
-  
-      // Send a response with the saved user data
-      res.status(201).json(savedUser);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    let {
+      firstName,
+      lastName,
+      userContact,
+      email,
+      username,
+      password,
+      roleAssignments,
+      permissions,
+    } = req.body;
+
+    // ✅ Parse JSON strings if sent as strings
+    if (typeof roleAssignments === "string") {
+      roleAssignments = JSON.parse(roleAssignments);
     }
-  };
+    if (typeof permissions === "string") {
+      permissions = JSON.parse(permissions);
+    }
+
+    // Ensure permissions is always an array
+    if (!Array.isArray(permissions)) {
+      permissions = [];
+    }
+
+    // ✅ Normalize roleAssignments to match schema
+    roleAssignments = (roleAssignments || []).map((ra) => {
+      if (ra.roleId && ra.scopeType && ra.scopeItem) {
+        return {
+          roleId: new mongoose.Types.ObjectId(ra.roleId), // must match schema
+          scopeType: ra.scopeType,
+          scopeItem: new mongoose.Types.ObjectId(ra.scopeItem),
+        };
+      }
+      return ra;
+    });
+
+    // ✅ Collect role-based permissions
+    let rolePermissions = [];
+    for (let ra of roleAssignments) {
+      const role = await Role.findById(ra.roleId).populate("permissions");
+      if (role && role.permissions) {
+        role.permissions.forEach((perm) => {
+          if (perm.name && !rolePermissions.includes(perm.name)) {
+            rolePermissions.push(perm.name);
+          }
+        });
+      }
+    }
+
+    // ✅ Merge role + manual permissions
+    const finalPermissions = [...new Set([...rolePermissions, ...permissions])];
+
+    // ✅ Create user
+    const user = new User({
+      firstName,
+      lastName,
+      userContact,
+      email,
+      username,
+      password,
+      roleAssignments,
+      permissions: finalPermissions,
+      profileImagePath,
+    });
+
+    console.log("REQ BODY (normalized):", JSON.stringify(user, null, 2));
+
+    const savedUser = await user.save();
+
+    // ✅ Send SMS
+    const apiKey = process.env.MNOTIFY_API_KEY;
+    if (userContact) {
+      await axios.post("https://apps.mnotify.net/smsapi?", {
+        key: apiKey,
+        to: userContact,
+        msg: `Your username: ${username}\nYour temporal password: ${password}\nClick to login:\nhttps://stateofthekeepersapp.netlify.app/`,
+        sender_id: "KeepersApp",
+      });
+    }
+
+    res.status(201).json(savedUser);
+  } catch (error) {
+    console.error("Create User Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 // Update User
-exports.updateUser = async (req, res) => {
-    try {
-        const userId = req.params.id;
 
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).json({ message: "Invalid ObjectId format" });
-        }
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-        const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true });
-        if (updatedUser) {
-            res.json(updatedUser);
-        } else {
-            res.status(404).json({ message: "No Record Found to Update :(" });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    let {
+      firstName,
+      lastName,
+      userContact,
+      email,
+      username,
+      password,
+      roleAssignments,
+      permissions,
+    } = req.body;
+
+    // ✅ Parse if coming as JSON strings
+    if (typeof roleAssignments === "string") {
+      roleAssignments = JSON.parse(roleAssignments);
     }
+    if (typeof permissions === "string") {
+      permissions = JSON.parse(permissions);
+    }
+
+    // Ensure permissions is always an array
+    if (!Array.isArray(permissions)) {
+      permissions = [];
+    }
+
+    // ✅ Collect permissions from roles
+    let rolePermissions = [];
+    for (let ra of roleAssignments || []) {
+      const role = await Role.findById(ra.role).populate("permissions");
+      if (role && role.permissions) {
+        role.permissions.forEach((perm) => {
+          if (perm.name && !rolePermissions.includes(perm.name)) {
+            rolePermissions.push(perm.name);
+          }
+        });
+      }
+    }
+
+    // ✅ Merge role-based + manual permissions
+    const finalPermissions = [...new Set([...rolePermissions, ...permissions])];
+
+    // ✅ Update the user
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        firstName,
+        lastName,
+        userContact,
+        email,
+        username,
+        ...(password && { password }), // only update if provided
+        roleAssignments,
+        permissions: finalPermissions,
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Update User Error:", error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
+
 // Delete User
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const userId = req.params.id;
 
@@ -203,4 +307,14 @@ exports.deleteUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+};
+
+export default {
+  getAllUsers,
+  getUserById,
+  getUserPictures,
+  getUserByContact,
+  createUser,
+  updateUser,
+  deleteUser
 };

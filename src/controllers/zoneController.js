@@ -1,8 +1,9 @@
-const mongoose = require("mongoose");
-const Zone = require("../models/zoneModel");
+
+import mongoose from "mongoose";
+import Zone from "../models/zoneModel.js";
 
 //# 1. Retrieve All Zones
-exports.getAllZones = async (req, res) => {
+export const getAllZones = async (req, res) => {
     try {
         
         const zones = await Zone.find();
@@ -17,7 +18,7 @@ exports.getAllZones = async (req, res) => {
 };
 
 // Retrieve One Zone
-exports.getZoneById = async (req, res) => {
+export const getZoneById = async (req, res) => {
     try {
         const zoneId = req.params.id;
      
@@ -37,7 +38,7 @@ exports.getZoneById = async (req, res) => {
 };
 
 // Create Zone
-exports.createZone = async (req, res) => {
+export const createZone = async (req, res) => {
     try {
         const zone = new Zone(req.body);
         const savedZone= await zone.save();
@@ -48,7 +49,7 @@ exports.createZone = async (req, res) => {
 };
 
 // Update Zone
-exports.updateZone = async (req, res) => {
+export const updateZone = async (req, res) => {
     try {
         const zoneId = req.params.id;
 
@@ -68,7 +69,7 @@ exports.updateZone = async (req, res) => {
 };
 
 // Delete Zone
-exports.deleteZone = async (req, res) => {
+export const deleteZone = async (req, res) => {
     try {
         const zoneId = req.params.id;
 
@@ -86,3 +87,11 @@ exports.deleteZone = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export default {
+    getAllZones,
+    getZoneById,
+    createZone,
+    updateZone,
+    deleteZone
+  };

@@ -1,9 +1,9 @@
-const mongoose = require("mongoose");
-const Attendance = require("../models/attendanceModel");
+import mongoose from "mongoose";
+import Attendance from '../models/attendanceModel.js'
 
 
 //# 1. Retrieve All Attendances
-exports.getAllAttendances = async (req, res) => {
+export const getAllAttendances = async (req, res) => {
     try {
         
         const attendances = await Attendance.find();
@@ -18,7 +18,7 @@ exports.getAllAttendances = async (req, res) => {
 };
 
 // Retrieve One Attendance
-exports.getAttendanceById = async (req, res) => {
+export const getAttendanceById = async (req, res) => {
     try {
         const centerId = req.params.id;
 
@@ -38,7 +38,7 @@ exports.getAttendanceById = async (req, res) => {
 };
 
 // Create Attendance
-exports.createAttendance = async (req, res) => {
+export const createAttendance = async (req, res) => {
     try {
         const center = new Attendance(req.body);
         const savedAttendance= await center.save();
@@ -49,7 +49,7 @@ exports.createAttendance = async (req, res) => {
 };
 
 // Update Attendance
-exports.updateAttendance = async (req, res) => {
+export const updateAttendance = async (req, res) => {
     try {
         const centerId = req.params.id;
 
@@ -69,7 +69,7 @@ exports.updateAttendance = async (req, res) => {
 };
 
 // Delete Attendance
-exports.deleteAttendance = async (req, res) => {
+export const deleteAttendance = async (req, res) => {
     try {
         const centerId = req.params.id;
 
@@ -87,3 +87,11 @@ exports.deleteAttendance = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export default {
+    getAllAttendances,
+    getAttendanceById,
+    createAttendance,
+    updateAttendance,
+    deleteAttendance
+  };

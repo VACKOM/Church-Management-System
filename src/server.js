@@ -1,26 +1,39 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv").config();
-const path = require("path");
-const { S3Client } = require("@aws-sdk/client-s3"); // AWS SDK v3 import
-const multer = require("multer");
-const multerS3 = require("multer-s3");
-const memberRoutes = require("./routes/api/membersRoutes");
-const adminRoutes = require("./routes/api/administrators");
-const bacentaRoutes = require("./routes/api/bacentaRoutes");
-const centerRoutes = require("./routes/api/centersRoutes");
-const directorRoutes = require("./routes/api/directors");
-const targetRoutes = require("./routes/api/targetRoutes");
-const zoneRoutes = require("./routes/api/zonesRoutes");
-const attendanceRoutes = require("./routes/api/attendanceRoutes");
-const dbConnect = require("./config/connect");
-const authRoutes = require("./routes/users/authRouters");
-const userRoutes = require("./routes/users/userRouters");
-const File = require("./models/fileModel"); // Make sure you create a File model to store file metadata
-const app = express();
+
+
+
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url"; // needed for __dirname replacement
+import { S3Client } from "@aws-sdk/client-s3";
+import multer from "multer";
+import multerS3 from "multer-s3";
+
+import memberRoutes from "./routes/api/membersRoutes.js";
+import adminRoutes from "./routes/api/administrators.js";
+import bacentaRoutes from "./routes/api/bacentaRoutes.js";
+import centerRoutes from "./routes/api/centersRoutes.js";
+import directorRoutes from "./routes/api/directors.js";
+import targetRoutes from "./routes/api/targetRoutes.js";
+import zoneRoutes from "./routes/api/zonesRoutes.js";
+import attendanceRoutes from "./routes/api/attendanceRoutes.js";
+import dbConnect from "./config/connect.js";
+import authRoutes from "./routes/users/authRouters.js";
+import userRoutes from "./routes/users/userRouters.js";
+import File from "./models/fileModel.js";
+import roleRoutes from "./routes/users/roleRouters.js";
+
+ 
+
+// ✅ Recreate __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
+
+const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -92,10 +105,14 @@ app.use('/api/zones', zoneRoutes); // Set up director routes
 app.use('/api/targets', targetRoutes); // Set up director routes
 app.use('/api/attendances', attendanceRoutes); // Set up director routes
 app.use('/api/users', userRoutes);
+app.use("/api/roles", roleRoutes);
 
 
 // Serve static files from the 'uploads' directory in your backend
-app.use('/uploads', express.static(path.join(__dirname, 'utilities', 'uploads')));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "utilities", "uploads"))
+);
 
 // Connect to MongoDB and then start the server
 dbConnect();

@@ -1,5 +1,26 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // Make sure bcryptjs is imported
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+
+// Define Role Assignment Schema
+const roleAssignmentSchema = new mongoose.Schema({
+  roleId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Role", 
+    required: true 
+  },
+  scopeType: {
+    type: String,
+    enum: ["None", "CenterLeader", "ZoneLeader", "BacentaLeader"],
+    default: "None",
+  },
+  scopeItem: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: "scopeType", // ✅ correct (relative to the same subdoc)
+  },
+});
+
+
+
 
 const userSchema = new mongoose.Schema(
   {
@@ -7,94 +28,80 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     firstName: {
       type: String,
       required: true,
-    
+      trim: true,
     },
     lastName: {
       type: String,
       required: true,
-     
+      trim: true,
     },
     userContact: {
       type: String,
       required: true,
-      
+      trim: true,
     },
     password: {
       type: String,
       required: true,
-      minlength: 8, // Ensure passwords are at least 8 characters long for better security
+      minlength: 8,
+      validate: {
+        validator: (v) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(v),
+        message: () =>
+          `Password must contain at least 1 uppercase, 1 lowercase letter, and 1 number`,
+      },
     },
     email: {
       type: String,
       required: true,
-      //unique: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
-    role: {
-      type: String,
-      required: true,
-      enum: [
-        "bishop", 
-        "lead_pastor", 
-        "administrator", 
-        "zone", 
-        "center", 
-        "bacenta"
-      ],
-    },
-    permissions: {
-      type: [String], // List of specific permissions for this user
-      default: [],
-    },
-    centerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Center',  // Reference to the 'Center' model (assuming you have a 'Center' model)
-      default: null,
-    },
-    zoneId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Zone',  // Reference to the 'Center' model (assuming you have a 'Zone' model)
-      default: null,
-    },
-    bacentaId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Bacenta', // Reference to the 'Bacenta' model (assuming you have a 'Bacenta' model)
-      default: null,
-    },
+
+    // NEW: multiple roles with optional scoped assignments
+    roleAssignments: [roleAssignmentSchema],
+
     profileImagePath: {
-      type: String,  // Save the image file path as a string
-      default: null, // If no image is uploaded, set the default to null
-    }
+      type: String,
+      default: null,
+      match: /^https?:\/\//, // optional: ensures stored path is a valid URL if provided
+    },
   },
   {
     timestamps: true,
-    collection: 'users',  // Correct placement of collection name
+    collection: "users",
   }
 );
 
-// Hash password before saving the user
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+// Index for fast queries
+userSchema.index({ username: 1, email: 1 });
+
+// Hash password before saving
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
   try {
-    // Hash the password before saving it to the database
-    this.password = await bcrypt.hash(this.password, 10); // 10 salt rounds
+    this.password = await bcrypt.hash(this.password, 10);
     next();
   } catch (error) {
-    next(error); // Pass the error to the next middleware or handler
+    next(error);
   }
 });
 
-// Method to compare password 
-userSchema.methods.comparePassword = async function(password) {
+// Compare password method
+userSchema.methods.comparePassword = async function (password) {
   try {
     return await bcrypt.compare(password, this.password);
-  } catch (error) {
-    throw new Error('Error comparing passwords');
+  } catch {
+    return false;
   }
 };
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
+export default User;

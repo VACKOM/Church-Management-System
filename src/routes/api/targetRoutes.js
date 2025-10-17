@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const targetController = require('../../controllers/targetController'); // Assuming your controller is in the controllers folder
-const mongoose = require('mongoose');
+import express from 'express';
+import mongoose from 'mongoose';
+import targetController from '../../controllers/targetController.js'
 
+const router = express.Router();
 // Middleware to check if ObjectId is valid
 router.param('id', (req, res, next, id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -29,4 +29,4 @@ router.put('/:id/yearly-summary', targetController.updateYearlySummary);
 // Route to delete a target by its ID
 router.delete('/:id', targetController.deleteTarget);
 
-module.exports = router;
+export default router;

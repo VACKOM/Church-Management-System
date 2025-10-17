@@ -1,5 +1,5 @@
-const express = require("express");
-const bacentaController = require("../../controllers/bacentaController");
+import express from 'express';
+import bacentaController from '../../controllers/bacentaController.js'
 
 const router = express.Router();
 
@@ -18,5 +18,5 @@ router.put("/:id", bacentaController.updateBacenta);
 // Delete Bacenta
 router.delete("/:id", bacentaController.deleteBacenta);
 
-module.exports = router;
+export default router;
 

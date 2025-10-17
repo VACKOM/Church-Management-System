@@ -1,8 +1,9 @@
-const mongoose = require("mongoose");
-const Target = require('../models/targetModel'); // Assuming the model file is in the models directory
+
+import mongoose from "mongoose";
+import Target from "../models/targetModel.js";
 
 // Create a new target
-exports.createTarget = async (req, res) => {
+export const createTarget = async (req, res) => {
   try {
     const { targetName, centerName, performanceData } = req.body;
 
@@ -37,7 +38,7 @@ exports.createTarget = async (req, res) => {
 };
 
 // Get all targets
-exports.getAllTargets = async (req, res) => {
+export const getAllTargets = async (req, res) => {
   try {
     const targets = await Target.find();
     return res.status(200).json(targets);
@@ -48,7 +49,7 @@ exports.getAllTargets = async (req, res) => {
 };
 
 // Get a target by ID
-exports.getTargetById = async (req, res) => {
+export const getTargetById = async (req, res) => {
   try {
     const targetId = req.params.id;
 
@@ -71,7 +72,7 @@ exports.getTargetById = async (req, res) => {
 };
 
 // Update monthly performance data for a target
-exports.updateMonthlyPerformance = async (req, res) => {
+export const updateMonthlyPerformance = async (req, res) => {
   try {
     const targetId = req.params.id;
     const { month, targetMembers, targetBacentas, targetChurchAttendance } = req.body;
@@ -119,7 +120,7 @@ exports.updateMonthlyPerformance = async (req, res) => {
 };
 
 // Update yearly summary for a target (optional)
-exports.updateYearlySummary = async (req, res) => {
+export const updateYearlySummary = async (req, res) => {
   try {
     const targetId = req.params.id;
 
@@ -155,7 +156,7 @@ exports.updateYearlySummary = async (req, res) => {
 };
 
 // Delete a target
-exports.deleteTarget = async (req, res) => {
+export const deleteTarget = async (req, res) => {
   try {
     const targetId = req.params.id;
 
@@ -178,4 +179,14 @@ exports.deleteTarget = async (req, res) => {
     console.error('Error deleting target:', error);
     return res.status(500).json({ message: 'Error deleting target' });
   }
+};
+
+
+export default {
+  getAllTargets,
+  getTargetById,
+  createTarget,
+  updateMonthlyPerformance,
+  updateYearlySummary,
+  deleteTarget
 };

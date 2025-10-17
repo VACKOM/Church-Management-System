@@ -1,40 +1,36 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-// Middleware to authenticate the user using JWT
-const authenticate = (req, res, next) => {
-  const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' });
-  }
+export const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.status(401).json({ message: 'No token provided' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Add decoded user info to request
+    req.user = decoded; // includes roleAssignments
     next();
   } catch (error) {
-    res.status(400).json({ message: 'Invalid token.' });
+    console.error('JWT verification failed:', error.message);
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
-// Middleware to authorize user based on role and permissions
-const authorize = (roles = [], permissions = []) => {
+// middleware/authMiddleware.js
+export const authorize = (allowedScopeTypes = []) => {
   return (req, res, next) => {
-    const userRole = req.user.role;
-    const userPermissions = req.user.permissions;
-
-    // Check if the user's role is allowed
-    if (roles.length > 0 && !roles.includes(userRole)) {
-      return res.status(403).json({ message: 'Access forbidden. Insufficient permissions.' });
+    if (!req.user || !req.user.roleAssignments) {
+      return res.status(403).json({ message: 'No role assignments.' });
     }
 
-    // Check if the user has the necessary permissions
-    if (permissions.length > 0 && !permissions.some(permission => userPermissions.includes(permission))) {
-      return res.status(403).json({ message: 'Access forbidden. Insufficient permissions.' });
+    const isAuthorized = req.user.roleAssignments.some(assign =>
+      allowedScopeTypes.includes(assign.scopeType)
+    );
+
+    if (!isAuthorized) {
+      return res.status(403).json({ message: 'Insufficient permissions.' });
     }
 
     next();
   };
 };
-
-module.exports = { authenticate, authorize };
-

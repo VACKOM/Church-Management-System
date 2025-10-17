@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 // Schema for monthly performance data
 const monthSchema = new mongoose.Schema({
@@ -27,5 +27,8 @@ const targetSchema = new mongoose.Schema({
   collection: 'targets'
 });
 
-module.exports = mongoose.model('Target', targetSchema);
+
+const Target= mongoose.model('Target', targetSchema);
+
+export default Target;
 

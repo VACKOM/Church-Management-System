@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const centerSchema = new mongoose.Schema({
   centerID: { type: String },
@@ -14,4 +14,6 @@ const centerSchema = new mongoose.Schema({
 
 );
 
-module.exports = mongoose.model('Center', centerSchema);
+const Center = mongoose.model('Center', centerSchema);
+
+export default Center;

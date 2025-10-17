@@ -1,5 +1,5 @@
-const express = require("express");
-const zoneController = require("../../controllers/zoneController");
+import express from 'express';
+import zoneController from '../../controllers/zoneController.js'
 
 const router = express.Router();
 
@@ -18,4 +18,4 @@ router.put("/:id", zoneController.updateZone);
 // Delete Bacenta
 router.delete("/:id", zoneController.deleteZone);
 
-module.exports = router;
+export default router;

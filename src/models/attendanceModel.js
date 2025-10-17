@@ -1,15 +1,26 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const attendanceSchema = new mongoose.Schema({
-  member_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
-  date:{type:Date, required:true},
-  service: { type: Number, required: true },
-  status: { type: Number, required: true }
-},
-{
+const attendanceSchema = new mongoose.Schema(
+  {
+    date: { type: Date, required: true },
+    sundayAttendance: { type: Number, required: true },
+    childrenAttendance: { type: Number, required: true },
+    adultAttendance: { type: Number, required: true },
+    soulsInChurch: { type: Number, required: true },
+    bacentaMeetingAttendance: { type: Number, required: true },
+    newBelieversSchoolAttendance: { type: Number, required: true },
+    membersAbsent: { type: Number, required: true },
+    centerName: { type: String, required: true },
+    bacentaName: { type: String, required: true },
+    zoneName: { type: String, required: true },
+    laySchoolAttendance: { type: Number, required: true }
+  },
+  {
     timestamps: true,
-    collection: 'attendances'  // Correct placement of collection name
-}
+    collection: "attendances" // Correct placement of collection name
+  }
 );
 
-module.exports = mongoose.model('Attendance', attendanceSchema);
+const Attendance = mongoose.model("Attendance", attendanceSchema);
+
+export default Attendance;

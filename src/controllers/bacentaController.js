@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
-const Bacenta = require("../models/bacentaModel"); // Assuming Bacenta is exported correctly
+import mongoose from "mongoose";
+import Bacenta from "../models/bacentaModel.js";
 
 // Retrieve All Bacentas 
-exports.getAllBacentas = async (req, res) => {
+export const getAllBacentas = async (req, res) => {
     try {
         const bacentas = await Bacenta.find();
         if (bacentas.length > 0) {
@@ -16,7 +16,7 @@ exports.getAllBacentas = async (req, res) => {
 };
 
 // Retrieve One Bacenta
-exports.getBacentaById = async (req, res) => {
+export const getBacentaById = async (req, res) => {
     try {
         const bacentaId = req.params.id;
 
@@ -36,7 +36,7 @@ exports.getBacentaById = async (req, res) => {
 };
 
 // Create Bacenta 
-exports.createBacenta = async (req, res) => {
+export const createBacenta = async (req, res) => {
     try {
         const bacenta = new Bacenta(req.body);
         const savedBacenta = await bacenta.save();
@@ -47,7 +47,7 @@ exports.createBacenta = async (req, res) => {
 };
 
 // Update Bacenta
-exports.updateBacenta = async (req, res) => {
+export const updateBacenta = async (req, res) => {
     try {
         const bacentaId = req.params.id;
 
@@ -67,7 +67,7 @@ exports.updateBacenta = async (req, res) => {
 };
 
 // Delete Bacenta
-exports.deleteBacenta = async (req, res) => {
+export const deleteBacenta = async (req, res) => {
     try {
         const bacentaId = req.params.id;
 
@@ -85,3 +85,13 @@ exports.deleteBacenta = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+
+export default {
+    getAllBacentas,
+    getBacentaById,
+    createBacenta,
+    updateBacenta,
+    deleteBacenta
+  };

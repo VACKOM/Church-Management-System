@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const bacentaSchema = new mongoose.Schema({
   bacentaName: { type: String, required: true },
@@ -17,4 +17,6 @@ const bacentaSchema = new mongoose.Schema({
 }
 );
 
-module.exports = mongoose.model('Bacenta', bacentaSchema);
+const Bacenta = mongoose.model('Bacenta', bacentaSchema);
+
+export default Bacenta;

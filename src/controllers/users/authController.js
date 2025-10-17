@@ -1,35 +1,46 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../../models/userModel');
-const Center = require('../../models/centerModel'); // Assuming you have a Center model
-const Zone = require("../../models/zoneModel");
-const Bacenta = require('../../models/bacentaModel'); // Assuming you have a Bacenta model
-const rolePermissions = require('../../config/rolePermissions');
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const register = async (req, res) => {
-  const { username, password, role, centerId, zoneId, bacentaId } = req.body;
-  const permissions = rolePermissions[role];
-  
+import User from "../../models/userModel.js";
+import Center from "../../models/centerModel.js";
+import Zone from "../../models/zoneModel.js";
+import Bacenta from "../../models/bacentaModel.js";
+import Role from "../../models/roleModel.js";
+
+// ============================
+// Register Controller
+// ============================
+export const register = async (req, res) => {
+  const { username, password, roles, centerId, zoneId, bacentaId } = req.body;
+
   // Validate input
-  if (!username || !password || !role) {
-    return res.status(400).json({ message: 'Username, password, and role are required' });
-  }
-
-  // Check if user already exists
-  const existingUser = await User.findOne({ username });
-  if (existingUser) {
-    return res.status(400).json({ message: 'User already exists' });
+  if (!username || !password || !roles || roles.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Username, password, and at least one role are required" });
   }
 
   try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Find roles in DB
+    const roleDocs = await Role.find({ name: { $in: roles } });
+    if (roleDocs.length === 0) {
+      return res.status(400).json({ message: "Invalid roles provided" });
+    }
+
     // Validate and check if centerId exists
     let centerObjectId = null;
     if (centerId) {
       if (!mongoose.Types.ObjectId.isValid(centerId)) {
-        return res.status(400).json({ message: 'Invalid centerId format' });
+        return res.status(400).json({ message: "Invalid centerId format" });
       }
-      centerObjectId = centerId; // Use the provided ObjectId
+      centerObjectId = centerId;
       const centerExists = await Center.findById(centerObjectId);
       if (!centerExists) {
         return res.status(400).json({ message: `Center with ID "${centerId}" does not exist` });
@@ -40,9 +51,9 @@ const register = async (req, res) => {
     let zoneObjectId = null;
     if (zoneId) {
       if (!mongoose.Types.ObjectId.isValid(zoneId)) {
-        return res.status(400).json({ message: 'Invalid zoneId format' });
+        return res.status(400).json({ message: "Invalid zoneId format" });
       }
-      zoneObjectId = zoneId; // Use the provided ObjectId
+      zoneObjectId = zoneId;
       const zoneExists = await Zone.findById(zoneObjectId);
       if (!zoneExists) {
         return res.status(400).json({ message: `Zone with ID "${zoneId}" does not exist` });
@@ -53,9 +64,9 @@ const register = async (req, res) => {
     let bacentaObjectId = null;
     if (bacentaId) {
       if (!mongoose.Types.ObjectId.isValid(bacentaId)) {
-        return res.status(400).json({ message: 'Invalid bacentaId format' });
+        return res.status(400).json({ message: "Invalid bacentaId format" });
       }
-      bacentaObjectId = bacentaId; // Use the provided ObjectId
+      bacentaObjectId = bacentaId;
       const bacentaExists = await Bacenta.findById(bacentaObjectId);
       if (!bacentaExists) {
         return res.status(400).json({ message: `Bacenta with ID "${bacentaId}" does not exist` });
@@ -66,61 +77,64 @@ const register = async (req, res) => {
     const user = new User({
       username,
       password,
-      role,
-      permissions: permissions,
-      centerId: centerObjectId,  // Store the ObjectId for centerId 
-      zoneId: zoneObjectId,  // Store the ObjectId for zoneId
-      bacentaId: bacentaObjectId,  // Store the ObjectId for bacentaId
+      roles: roleDocs.map((r) => r._id),
+      centerId: centerObjectId,
+      zoneId: zoneObjectId,
+      bacentaId: bacentaObjectId,
     });
 
     await user.save();
-    res.status(201).json({ message: 'User created successfully' });
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    console.error(error);  // Log the error for debugging purposes
-    res.status(500).json({ message: 'Error registering user' });
+    console.error("Error registering user:", error);
+    res.status(500).json({ message: "Error registering user" });
   }
 };
 
-const login = async (req, res) => {
+// ============================
+// Login Controller
+// ============================
+export const login = async (req, res) => {
   const { username, password } = req.body;
+  console.log(username, password )
 
   // Validate input
   if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
+    return res.status(400).json({ message: "Username and password are required" });
   }
 
   try {
     const user = await User.findOne({ username });
-   
+
     if (!user) {
-      return res.status(400).json({ message: 'Username Invalid' });
+      return res.status(400).json({ message: "Username invalid" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch)
     if (!isMatch) {
-      return res.status(400).json({ message: 'Password invalid' });
+      return res.status(400).json({ message: "Password invalid" });
     }
 
     const token = jwt.sign(
-      { 
-        id: user._id, 
-        role: user.role, 
-        permissions: user.permissions, 
-        centerId: user.centerId, 
-        zoneId: user.zoneId, 
-        bacentaId: user.bacentaId
-      }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '1h' }
+      {
+        id: user._id,
+        roleAssignments: user.roleAssignments.map((ra) => ({
+          roleId: ra.roleId,
+          scopeType: ra.scopeType,
+          scopeItem: ra.scopeItem,
+        })),
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
     );
- 
+
     res.json({ token });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error logging in' });
+    console.error("Error logging in:", error);
+    res.status(500).json({ message: "Error logging in" });
   }
 };
 
 
-
-module.exports = { register, login };
+export default { register, login };
