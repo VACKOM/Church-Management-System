@@ -198,7 +198,10 @@ export const createUser = async (req, res) => {
 
     // ✅ Send SMS
     const apiKey = process.env.MNOTIFY_API_KEY;
+    console.log(password)
+    
     if (userContact) {
+      
       await axios.post("https://apps.mnotify.net/smsapi?", {
         key: apiKey,
         to: userContact,
