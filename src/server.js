@@ -24,6 +24,7 @@ import authRoutes from "./routes/users/authRouters.js";
 import userRoutes from "./routes/users/userRouters.js";
 import File from "./models/fileModel.js";
 import roleRoutes from "./routes/users/roleRouters.js";
+import membershipRoutes from "./routes/api/membershipRoutes.js"
 
  
 
@@ -106,7 +107,7 @@ app.use('/api/targets', targetRoutes); // Set up director routes
 app.use('/api/attendances', attendanceRoutes); // Set up director routes
 app.use('/api/users', userRoutes);
 app.use("/api/roles", roleRoutes);
-
+app.use('/api/membership', membershipRoutes);
 
 // Serve static files from the 'uploads' directory in your backend
 app.use(
